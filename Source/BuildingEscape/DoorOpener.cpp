@@ -3,7 +3,7 @@
 
 #include "DoorOpener.h"
 #include "GameFramework/Actor.h"
-#include "Quat.h"
+#include "Engine/World.h"
 
 // Sets default values for this component's properties
 UDoorOpener::UDoorOpener()
@@ -11,8 +11,6 @@ UDoorOpener::UDoorOpener()
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
-
-	// ...
 }
 
 
@@ -21,9 +19,9 @@ void UDoorOpener::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// ...
-	auto owner = GetOwner();
-	owner->SetActorRelativeRotation(FRotator(0, 90, 0));
+	Owner = GetOwner();
+
+	ActorThatOpens = GetWorld()->GetFirstPlayerController()->GetPawn();
 }
 
 
@@ -32,6 +30,9 @@ void UDoorOpener::TickComponent(float DeltaTime, ELevelTick TickType, FActorComp
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	// ...
+	if (PressurePlate->IsOverlappingActor(ActorThatOpens))
+	{
+		Owner->SetActorRelativeRotation(FRotator(0, OpenAngle, 0));
+	}
 }
 
