@@ -30,8 +30,6 @@ private:
 	ATriggerVolume* PressurePlate;
 
 	AActor* ActorThatOpens;
-	AActor* Owner;
-	UWorld* World;
 	float OriginalAngle = 0.f;
 	float LastDoorOpenTime = 0.f;
 	void OpenDoor();

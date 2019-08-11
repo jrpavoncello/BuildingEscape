@@ -14,11 +14,19 @@ void UDoorOpener::BeginPlay()
 {
 	Super::BeginPlay();
 
-	Owner = GetOwner();
-	World = GetWorld();
+	ActorThatOpens = GetWorld()->GetFirstPlayerController()->GetPawn();
 
-	ActorThatOpens = World->GetFirstPlayerController()->GetPawn();
-	OriginalAngle = Owner->GetActorRotation().Yaw;
+	if (!ActorThatOpens)
+	{
+		UE_LOG(LogTemp, Error, TEXT("Actor that opens (first player controller) was not configured on %s."), *GetOwner()->GetName());
+	}
+
+	if (!PressurePlate)
+	{
+		UE_LOG(LogTemp, Error, TEXT("Pressure plate was not configured on %s."), *GetOwner()->GetName());
+	}
+
+	OriginalAngle = GetOwner()->GetActorRotation().Yaw;
 }
 
 void UDoorOpener::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -28,11 +36,11 @@ void UDoorOpener::TickComponent(float DeltaTime, ELevelTick TickType, FActorComp
 	if (PressurePlate->IsOverlappingActor(ActorThatOpens))
 	{
 		OpenDoor();
-		LastDoorOpenTime = World->GetTimeSeconds();
+		LastDoorOpenTime = GetWorld()->GetTimeSeconds();
 	}
 
 	if (LastDoorOpenTime != 0 &&
-		World->GetTimeSeconds() - LastDoorOpenTime > SecondsToClose)
+		GetWorld()->GetTimeSeconds() - LastDoorOpenTime > SecondsToClose)
 	{
 		CloseDoor();
 	}
@@ -40,10 +48,10 @@ void UDoorOpener::TickComponent(float DeltaTime, ELevelTick TickType, FActorComp
 
 void UDoorOpener::OpenDoor()
 {
-	Owner->SetActorRelativeRotation(FRotator(0, OpenAngle, 0));
+	GetOwner()->SetActorRelativeRotation(FRotator(0, OpenAngle, 0));
 }
 
 void UDoorOpener::CloseDoor()
 {
-	Owner->SetActorRelativeRotation(FRotator(0, OriginalAngle, 0));
+	GetOwner()->SetActorRelativeRotation(FRotator(0, OriginalAngle, 0));
 }

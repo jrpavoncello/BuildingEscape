@@ -23,8 +23,8 @@ void UPositionReporter::BeginPlay()
 	auto objectName = GetOwner()->GetName();
 	auto location = GetOwner()->GetActorTransform().GetLocation();
 
-	UE_LOG(LogTemp, Warning, TEXT("Position reporter started for %s"), *objectName);
-	UE_LOG(LogTemp, Warning, TEXT("%s is at X=%f, Y=%f, Z=%f"), *objectName, location.X, location.Y, location.Z);
+	UE_LOG(LogTemp, Verbose, TEXT("Position reporter started for %s"), *objectName);
+	UE_LOG(LogTemp, Verbose, TEXT("%s is at X=%f, Y=%f, Z=%f"), *objectName, location.X, location.Y, location.Z);
 	
 }
 
