@@ -1,11 +1,8 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "DoorOpener.h"
 #include "GameFramework/Actor.h"
+#include "GameFramework/PlayerController.h"
 #include "Engine/World.h"
 
-// Sets default values for this component's properties
 UDoorOpener::UDoorOpener()
 {
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
@@ -13,26 +10,40 @@ UDoorOpener::UDoorOpener()
 	PrimaryComponentTick.bCanEverTick = true;
 }
 
-
-// Called when the game starts
 void UDoorOpener::BeginPlay()
 {
 	Super::BeginPlay();
 
 	Owner = GetOwner();
+	World = GetWorld();
 
-	ActorThatOpens = GetWorld()->GetFirstPlayerController()->GetPawn();
+	ActorThatOpens = World->GetFirstPlayerController()->GetPawn();
+	OriginalAngle = Owner->GetActorRotation().Yaw;
 }
 
-
-// Called every frame
 void UDoorOpener::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
 	if (PressurePlate->IsOverlappingActor(ActorThatOpens))
 	{
-		Owner->SetActorRelativeRotation(FRotator(0, OpenAngle, 0));
+		OpenDoor();
+		LastDoorOpenTime = World->GetTimeSeconds();
+	}
+
+	if (LastDoorOpenTime != 0 &&
+		World->GetTimeSeconds() - LastDoorOpenTime > SecondsToClose)
+	{
+		CloseDoor();
 	}
 }
 
+void UDoorOpener::OpenDoor()
+{
+	Owner->SetActorRelativeRotation(FRotator(0, OpenAngle, 0));
+}
+
+void UDoorOpener::CloseDoor()
+{
+	Owner->SetActorRelativeRotation(FRotator(0, OriginalAngle, 0));
+}

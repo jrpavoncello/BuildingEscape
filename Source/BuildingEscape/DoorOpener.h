@@ -1,5 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -23,13 +21,21 @@ protected:
 
 private:
 	UPROPERTY(EditAnywhere)
-		float OpenAngle = 90.f;
+	float OpenAngle = 90.f;
 
 	UPROPERTY(EditAnywhere)
-		ATriggerVolume* PressurePlate;
+	float SecondsToClose = 1.f;
+
+	UPROPERTY(EditAnywhere)
+	ATriggerVolume* PressurePlate;
 
 	AActor* ActorThatOpens;
 	AActor* Owner;
+	UWorld* World;
+	float OriginalAngle = 0.f;
+	float LastDoorOpenTime = 0.f;
+	void OpenDoor();
+	void CloseDoor();
 
 public:	
 	// Called every frame
