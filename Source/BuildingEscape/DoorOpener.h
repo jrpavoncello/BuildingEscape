@@ -24,6 +24,9 @@ private:
 	float OpenAngle = 90.f;
 
 	UPROPERTY(EditAnywhere)
+	float massRequiredToOpen = 80.f;
+
+	UPROPERTY(EditAnywhere)
 	float SecondsToClose = 1.f;
 
 	UPROPERTY(EditAnywhere)

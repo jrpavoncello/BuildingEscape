@@ -17,18 +17,18 @@ void UGrabber::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	PhysicsHandle = GetOwner()->FindComponentByClass<UPhysicsHandleComponent>();
+	physicsHandle = GetOwner()->FindComponentByClass<UPhysicsHandleComponent>();
 
-	if (!PhysicsHandle)
+	if (!physicsHandle)
 	{
 		UE_LOG(LogTemp, Error, TEXT("Missing physics handle component in %s."), *GetOwner()->GetName());
 	}
 
-	InputComponent = GetOwner()->FindComponentByClass<UInputComponent>();
+	inputComponent = GetOwner()->FindComponentByClass<UInputComponent>();
 
-	if (InputComponent)
+	if (inputComponent)
 	{
-		InputComponent->BindAction
+		inputComponent->BindAction
 		(
 			"Grab",
 			EInputEvent::IE_Pressed,
@@ -36,7 +36,7 @@ void UGrabber::BeginPlay()
 			&UGrabber::Grab
 		);
 
-		InputComponent->BindAction
+		inputComponent->BindAction
 		(
 			"Grab",
 			EInputEvent::IE_Released,
@@ -50,23 +50,23 @@ void UGrabber::BeginPlay()
 	}
 }
 
-void UGrabber::GetTraceBegin(FVector& traceBegin, FRotator& rotation)
+void UGrabber::GetTraceBegin(FVector& out_traceBegin, FRotator& out_rotation)
 {
 	FVector location;
 	FRotator rotator;
-	GetWorld()->GetFirstPlayerController()->GetPlayerViewPoint(traceBegin, rotation);
+	GetWorld()->GetFirstPlayerController()->GetPlayerViewPoint(out_traceBegin, out_rotation);
 }
 
 FVector UGrabber::GetTraceEnd(const FVector& traceBegin, const FRotator& rotation)
 {
-	return traceBegin + rotation.Vector() * Reach;
+	return traceBegin + rotation.Vector() * reach;
 }
 
-void UGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+void UGrabber::TickComponent(float deltaTime, ELevelTick tickType, FActorComponentTickFunction* thisTickFunction)
 {
-	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+	Super::TickComponent(deltaTime, tickType, thisTickFunction);
 
-	if (PhysicsHandle->GrabbedComponent)
+	if (physicsHandle->GrabbedComponent)
 	{
 		FVector traceBegin;
 		FRotator rotation;
@@ -90,8 +90,8 @@ void UGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompone
 
 		UE_LOG(LogTemp, VeryVerbose, TEXT("New target rotation %s"), *newRotation.ToString());
 
-		PhysicsHandle->SetTargetLocation(traceEnd);
-		PhysicsHandle->SetTargetRotation(newRotation);
+		physicsHandle->SetTargetLocation(traceEnd);
+		physicsHandle->SetTargetRotation(newRotation);
 	}
 }
 
@@ -107,7 +107,7 @@ void UGrabber::Grab()
 	auto queryParams = FCollisionQueryParams(FName(TEXT("")), false, GetOwner());
 
 	FHitResult outHit;
-	if (InputComponent->
+	if (inputComponent->
 		GetWorld()->LineTraceSingleByObjectType(
 			outHit,
 			traceBegin,
@@ -119,19 +119,19 @@ void UGrabber::Grab()
 
 		if (grabbedActor)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Grabbed actor %s"), *grabbedActor->GetName());
+			UE_LOG(LogTemp, Log, TEXT("Grabbed actor %s"), *grabbedActor->GetName());
 
 			auto component = outHit.GetComponent();
 
-			PhysicsHandle->GrabComponent(
+			physicsHandle->GrabComponent(
 				component,
 				NAME_None,
 				traceEnd,
 				// constrain rotation
 				true);
 
-			UE_LOG(LogTemp, Log, TEXT("Grabbed object start rotation %s"), *grabbedObjectStartRotation.ToString());
-			UE_LOG(LogTemp, Log, TEXT("Grabber start yaw %f"), grabberStartYaw);
+			UE_LOG(LogTemp, VeryVerbose, TEXT("Grabbed object start rotation %s"), *grabbedObjectStartRotation.ToString());
+			UE_LOG(LogTemp, VeryVerbose, TEXT("Grabber start yaw %f"), grabberStartYaw);
 
 			grabbedObjectStartRotation = grabbedActor->GetActorRotation();
 			grabberStartYaw = rotation.Yaw;
@@ -141,7 +141,7 @@ void UGrabber::Grab()
 
 void UGrabber::Release()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Released!"));
-	PhysicsHandle->ReleaseComponent();
+	UE_LOG(LogTemp, Log, TEXT("Released!"));
+	physicsHandle->ReleaseComponent();
 }
 
