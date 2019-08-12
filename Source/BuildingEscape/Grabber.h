@@ -25,16 +25,15 @@ private:
 	UPROPERTY(EditAnywhere)
 	float reach = 100.f;
 
-	UPhysicsHandleComponent* physicsHandle;
-	UInputComponent* inputComponent;
-	void Grab();
-	void Release();
-
-	AActor* grabbedActor;
+	UPhysicsHandleComponent* physicsHandle = nullptr;
+	UInputComponent* inputComponent = nullptr;
+	AActor* grabbedActor = nullptr;
 	FRotator grabbedObjectStartRotation;
 	float grabberStartYaw = 0.f;
 	FVector grabOffset;
 
+	void Grab();
+	void Release();
 	void GetTraceBegin(FVector& traceBegin, FRotator& rotation);
 	FVector GetTraceEnd(const FVector& traceBegin, const FRotator& rotation);
 

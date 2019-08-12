@@ -26,28 +26,27 @@ void UGrabber::BeginPlay()
 
 	inputComponent = GetOwner()->FindComponentByClass<UInputComponent>();
 
-	if (inputComponent)
-	{
-		inputComponent->BindAction
-		(
-			"Grab",
-			EInputEvent::IE_Pressed,
-			this,
-			&UGrabber::Grab
-		);
-
-		inputComponent->BindAction
-		(
-			"Grab",
-			EInputEvent::IE_Released,
-			this,
-			&UGrabber::Release
-		);
-	}
-	else
+	if (!inputComponent)
 	{
 		UE_LOG(LogTemp, Error, TEXT("Missing input component in %s."), *GetOwner()->GetName());
+		return;
 	}
+
+	inputComponent->BindAction
+	(
+		"Grab",
+		EInputEvent::IE_Pressed,
+		this,
+		&UGrabber::Grab
+	);
+
+	inputComponent->BindAction
+	(
+		"Grab",
+		EInputEvent::IE_Released,
+		this,
+		&UGrabber::Release
+	);
 }
 
 void UGrabber::GetTraceBegin(FVector& out_traceBegin, FRotator& out_rotation)
@@ -66,37 +65,49 @@ void UGrabber::TickComponent(float deltaTime, ELevelTick tickType, FActorCompone
 {
 	Super::TickComponent(deltaTime, tickType, thisTickFunction);
 
-	if (physicsHandle->GrabbedComponent)
+	if (!physicsHandle)
 	{
-		FVector traceBegin;
-		FRotator rotation;
-		GetTraceBegin(traceBegin, rotation);
-
-		UE_LOG(LogTemp, VeryVerbose, TEXT("Location: %s, Rotation: %s"), *traceBegin.ToString(), *rotation.ToString());
-
-		auto traceEnd = GetTraceEnd(traceBegin, rotation);
-
-		auto grabberYaw = rotation.Yaw;
-
-		UE_LOG(LogTemp, VeryVerbose, TEXT("Grabber yaw %f"), grabberYaw);
-
-		float grabberYawDelta = grabberYaw - grabberStartYaw;
-
-		UE_LOG(LogTemp, VeryVerbose, TEXT("Grabber delta %f"), grabberYawDelta);
-
-		auto newRotation = grabbedObjectStartRotation;
-
-		newRotation.Yaw = grabbedObjectStartRotation.Yaw + grabberYawDelta;
-
-		UE_LOG(LogTemp, VeryVerbose, TEXT("New target rotation %s"), *newRotation.ToString());
-
-		physicsHandle->SetTargetLocation(traceEnd);
-		physicsHandle->SetTargetRotation(newRotation);
+		return;
 	}
+
+	if (!physicsHandle->GrabbedComponent)
+	{
+		return;
+	}
+
+	FVector traceBegin;
+	FRotator rotation;
+	GetTraceBegin(traceBegin, rotation);
+
+	UE_LOG(LogTemp, VeryVerbose, TEXT("Location: %s, Rotation: %s"), *traceBegin.ToString(), *rotation.ToString());
+
+	auto traceEnd = GetTraceEnd(traceBegin, rotation);
+
+	auto grabberYaw = rotation.Yaw;
+
+	UE_LOG(LogTemp, VeryVerbose, TEXT("Grabber yaw %f"), grabberYaw);
+
+	float grabberYawDelta = grabberYaw - grabberStartYaw;
+
+	UE_LOG(LogTemp, VeryVerbose, TEXT("Grabber delta %f"), grabberYawDelta);
+
+	auto newRotation = grabbedObjectStartRotation;
+
+	newRotation.Yaw = grabbedObjectStartRotation.Yaw + grabberYawDelta;
+
+	UE_LOG(LogTemp, VeryVerbose, TEXT("New target rotation %s"), *newRotation.ToString());
+
+	physicsHandle->SetTargetLocation(traceEnd);
+	physicsHandle->SetTargetRotation(newRotation);
 }
 
 void UGrabber::Grab()
 {
+	if (!physicsHandle)
+	{
+		return;
+	}
+
 	FVector traceBegin;
 	FRotator rotation;
 	GetTraceBegin(traceBegin, rotation);
@@ -141,6 +152,12 @@ void UGrabber::Grab()
 
 void UGrabber::Release()
 {
+	if (!physicsHandle)
+	{
+		return;
+	}
+
+	grabbedActor = nullptr;
 	UE_LOG(LogTemp, Log, TEXT("Released!"));
 	physicsHandle->ReleaseComponent();
 }

@@ -5,6 +5,8 @@
 #include "Engine/TriggerVolume.h"
 #include "DoorOpener.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnOpenRequest);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnCloseRequest);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class BUILDINGESCAPE_API UDoorOpener : public UActorComponent
@@ -21,24 +23,21 @@ protected:
 
 private:
 	UPROPERTY(EditAnywhere)
-	float OpenAngle = 90.f;
-
-	UPROPERTY(EditAnywhere)
 	float massRequiredToOpen = 80.f;
 
 	UPROPERTY(EditAnywhere)
-	float SecondsToClose = 1.f;
+	ATriggerVolume* PressurePlate = nullptr;
 
-	UPROPERTY(EditAnywhere)
-	ATriggerVolume* PressurePlate;
-
-	AActor* ActorThatOpens;
-	float OriginalAngle = 0.f;
-	float LastDoorOpenTime = 0.f;
 	void OpenDoor();
 	void CloseDoor();
 
 public:	
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnOpenRequest OnOpenRequest;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnOpenRequest OnCloseRequest;
 };
